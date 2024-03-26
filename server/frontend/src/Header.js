@@ -1,7 +1,5 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography } from '@mui/material';
-//import App from './App';
-//import './Header.css'; 
 
 const Header = () => {
     return(

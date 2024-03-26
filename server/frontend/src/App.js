@@ -1,17 +1,25 @@
+import React from 'react';
+import CssBaseline from '@mui/material/CssBaseline';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Dashboard from './pages/Dashboard';
+import Settings from './pages/Settings';
 
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import theme from './theme';
-import HomePage from './pages/HomePage';
-//import DevicePage from './pages/DevicePage'; 
+// Create a dark theme using MUI's theming system
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          {/*<Route path="/device/:id" component={DevicePage} />*/}
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </Router>
     </ThemeProvider>
@@ -19,3 +27,18 @@ function App() {
 }
 
 export default App;
+
+
+/* Things to Try
+--data display
+-divider
+-table
+--feedback
+-alert
+-dialog
+-progress
+-skeleton 
+--navigation
+-stepper --adding new devices
+-tabs --navigating devices
+*/

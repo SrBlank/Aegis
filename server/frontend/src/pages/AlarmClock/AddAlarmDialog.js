@@ -9,8 +9,8 @@ const AddAlarmDialog = ({ isOpen, onClose, onAddAlarm }) => {
   const [newAlarmDays, setNewAlarmDays] = useState([]);
   const [newAlarmSound, setNewAlarmSound] = useState('Beep');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const daysOfWeek = ['Su', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
-  const sounds = ['Beep', 'Chime', 'Ringtone']; // Example sounds
+  const daysOfWeek = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
+  const sounds = ['Beep', 'Chime', 'Ringtone']; 
 
   const handleDayChange = (day) => {
     setNewAlarmDays(prev =>
@@ -26,10 +26,11 @@ const AddAlarmDialog = ({ isOpen, onClose, onAddAlarm }) => {
 
     onAddAlarm({
       time: newAlarmTime,
-      days: newAlarmDays.join(', '),
+      days: newAlarmDays,
       sound: newAlarmSound,
       active: true
     });
+    
     // Reset the fields
     setNewAlarmTime('');
     setNewAlarmDays([]);

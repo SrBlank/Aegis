@@ -19,7 +19,7 @@ const EditAlarmDialog = ({ isOpen, onClose, alarms, onDeleteAlarm }) => {
                 secondary={alarm.days}
               />
               <ListItemSecondaryAction>
-                <Button color="secondary" onClick={() => onDeleteAlarm(alarm.id)}>
+                <Button color="secondary" onClick={() => onDeleteAlarm(alarm._id)}>
                   Delete
                 </Button>
               </ListItemSecondaryAction>

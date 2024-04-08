@@ -14,7 +14,7 @@ const Weather = lazy(() => import('./WeatherStation'));
 const devices = [
   { id: 1, name: 'Alarm Clock', status: 'Online' },
   { id: 2, name: 'Weather Station', status: 'Offline' },
-  { id: 3, name: 'Mirror', status: 'Online'},
+  { id: 3, name: 'Camera', status: 'Online'},
 ];
 
 // Dashboard component definition

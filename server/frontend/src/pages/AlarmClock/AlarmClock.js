@@ -11,7 +11,7 @@ const AlarmClock = () => {
   const [alarms, setAlarms] = useState([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const url = "http://localhost:3001/api/alarms";
+  const url = "http://localhost:3001/api/alarmclock/alarms";
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -64,35 +64,24 @@ const AlarmClock = () => {
     }
 };
 
+const handleToggleAlarm = async (id) => {
+  try {
+      const response = await axios.patch(`${url}/${id}/toggle`);
+      const toggledAlarm = response.data;
 
-  const handleToggleAlarm = async (id) => {
-    const alarmIndex = alarms.findIndex(alarm => alarm._id === id);
-    if (alarmIndex === -1) {
-        console.error('Alarm not found');
-        return;
-    }
+      // Update the alarm state in the local state
+      const updatedAlarms = alarms.map(alarm => {
+          if (alarm._id === id) {
+              return toggledAlarm;
+          }
+          return alarm;
+      });
 
-    const updatedAlarms = [...alarms];
-    updatedAlarms[alarmIndex] = {
-        ...updatedAlarms[alarmIndex],
-        active: !updatedAlarms[alarmIndex].active
-    };
-
-    // Update the UI
-    setAlarms(updatedAlarms);
-
-    try {
-        const response = await axios.put(`${url}/${id}`, updatedAlarms[alarmIndex]);
-        updatedAlarms[alarmIndex] = response.data;
-        setAlarms(updatedAlarms);
-    } catch (error) {
-        console.error('Error toggling alarm:', error);
-        updatedAlarms[alarmIndex].active = !updatedAlarms[alarmIndex].active;
-        setAlarms(updatedAlarms);
-    }
-  };
-
-
+      setAlarms(updatedAlarms);
+  } catch (error) {
+      console.error('Error toggling alarm:', error);
+  }
+};
 
   return (
     <Box>

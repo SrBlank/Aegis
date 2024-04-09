@@ -1,6 +1,0 @@
-{
-    "deviceIP": "10.0.0.X",
-    "mongoDB": "mongodb://localhost:27017/[DB_NAME]",
-    "expressPort": 3001,
-    "reactPort": 3000
-}

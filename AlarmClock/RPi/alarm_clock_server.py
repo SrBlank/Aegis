@@ -1,3 +1,4 @@
+import json
 import requests
 import schedule
 import time
@@ -5,7 +6,11 @@ from datetime import datetime
 import pygame
 import RPi.GPIO as GPIO
 
-API_URL = 'http://10.0.0.8:3001/api/alarms'
+# Load configuration
+with open('config.json') as config_file:
+    config = json.load(config_file)
+
+API_URL = f'http://{config["deviceIP"]}:{config["expressPort"]}/api/alarms'
 DEVICE_ID = 'your-device-id'
 HEARTBEAT_INTERVAL = 60  # Send heartbeat every 60 seconds
 BUTTON_PIN = 17  # GPIO pin number for the button

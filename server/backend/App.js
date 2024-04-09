@@ -2,9 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const config = require('../../config.json');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/aegisDB', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(config.mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Define a schema for the alarm 
 const alarmSchema = new mongoose.Schema({
@@ -186,7 +187,8 @@ app.delete('/api/devices/:id', async (req, res) => {
 });
 
 // Start the server
-const port = 3001;
+const port = config.expressPort 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running at http://10.0.0.8:${port}`);
+  console.log(`Server running at http://0.0.0.0:${port}`);
 });
+

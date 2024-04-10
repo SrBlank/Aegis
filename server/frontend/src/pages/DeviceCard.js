@@ -1,9 +1,10 @@
+// DeviceCard.js
 import React from 'react';
 import { Card, CardActionArea, CardContent, Typography, Box } from '@mui/material';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 
 export default function DeviceCard({ device, onClick }) {
-  const onlineStatus = device.status === 'Online';
+  const onlineStatus = device.status.toLowerCase() === 'online'; // Ensure case-insensitive comparison
 
   return (
     <Card onClick={() => onClick(device.id)}>

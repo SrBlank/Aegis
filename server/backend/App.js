@@ -53,7 +53,7 @@ const deviceSchema = new mongoose.Schema({
 
 const Alarm = mongoose.model('Alarm', alarmSchema);
 const Device = mongoose.model('Device', deviceSchema)
-const HEARTBEAT_THRESHOLD = 2 * 60 * 1000; // 2 minutes in milliseconds
+const HEARTBEAT_THRESHOLD = 30 * 1000;//2 * 60 * 1000; // 2 minutes in milliseconds
 
 setInterval(async () => {
   try {
@@ -122,7 +122,7 @@ app.patch('/api/alarmclock/alarms/:id/toggle', async (req, res) => {
 /*            */
 /* Device API */
 /*            */
-app.get('/api/devices/', async (req, res) => {
+app.get('/api/devices', async (req, res) => {
   try {
     const devices = await Device.find();
     res.json(devices);
@@ -143,7 +143,7 @@ app.get('/api/devices/status/:name', async (req, res) => {
   }
 });
 
-app.post('/api/devices/', async (req, res) => {
+app.post('/api/devices', async (req, res) => {
   try {
     const device = new Device(req.body);
     await device.save();

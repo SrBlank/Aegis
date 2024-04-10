@@ -1,27 +1,32 @@
-import React, { useState, Suspense, lazy } from 'react';
-import { AppBar, Tabs, Tab, Box, Grid, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider} from '@mui/material';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { AppBar, Tabs, Tab, Box, Grid, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import DeviceCard from './DeviceCard';
 
-// Lazy load device components
 const Alarm = lazy(() => import('./AlarmClock/AlarmClock'));
 const Weather = lazy(() => import('./WeatherStation')); 
 
-// Devices array to be replaced by API
-const devices = [
-  { id: 1, name: 'Alarm Clock', status: 'Online' },
-  { id: 2, name: 'Weather Station', status: 'Offline' },
-  { id: 3, name: 'Camera', status: 'Online'},
-];
-
-// Dashboard component definition
 export default function Dashboard() {
-  // State hook for activeTab, initialized to 0 (the home tab)
   const [activeTab, setActiveTab] = useState(0);
   const [open, setOpen] = useState(false);
+  const [devices, setDevices] = useState([]);
+
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/devices');
+        const data = await response.json();
+        setDevices(data);
+      } catch (error) {
+        console.error('Error fetching devices:', error);
+      }
+    };
+  
+    if (activeTab === 0) { // Only fetch devices when on the Home tab
+      fetchDevices();
+    }
+  }, [activeTab]); // Add activeTab as a dependency  
 
   const goHome = () => () => {
     setActiveTab(0);
@@ -61,27 +66,28 @@ export default function Dashboard() {
 
   // Function to render the content based on the active tab
   const renderTabContent = () => {
-    if (activeTab === 0) { // Check if the home tab is active
+    if (activeTab === 0) { // Home tab
       return (
         <Grid container spacing={2}>
           {devices.map((device, index) => (
-            <Grid item xs={12} sm={6} md={4} key={device.id}>
+            <Grid item xs={12} sm={6} md={4} key={device._id}>
               <DeviceCard device={device} onClick={() => setActiveTab(index + 1)} />
             </Grid>
           ))}
         </Grid>
       );
     } else {
-      const device = devices[activeTab - 1]; // for tabs other than the home find the corresponding device
-
-      switch (device.id) { // return the corresponding component
-        case 1:
-          return ( // Suspense and lazy loading are used to dynamically load the component
+      const device = devices[activeTab - 1]; // Find the corresponding device
+      if (!device) return null;
+  
+      switch (device.name) { // Match based on device name
+        case 'Alarm Clock':
+          return (
             <Suspense fallback={<div>Loading...</div>}>
               <Alarm />
             </Suspense>
           );
-        case 2:
+        case 'Weather Station':
           return (
             <Suspense fallback={<div>Loading...</div>}>
               <Weather />

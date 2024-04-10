@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { AppBar, Tabs, Tab, Box, Grid, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
+import { AppBar, Tabs, Tab, Box, Grid, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider, Alert } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import DeviceCard from './DeviceCard';
@@ -22,7 +22,7 @@ export default function Dashboard() {
         console.error('Error fetching devices:', error);
       }
     };
-  
+
     if (activeTab === 0) { // Only fetch devices when on the Home tab
       fetchDevices();
     }
@@ -36,7 +36,6 @@ export default function Dashboard() {
     setOpen(newOpen);
   };
 
-  // Drawer Configuration
   const DrawerList = (
     <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
@@ -53,9 +52,6 @@ export default function Dashboard() {
         {['Settings'].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton>
-              {/*<ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>*/}
               <ListItemText primary={text} />
             </ListItemButton>
           </ListItem>
@@ -64,9 +60,8 @@ export default function Dashboard() {
     </Box>
   );
 
-  // Function to render the content based on the active tab
   const renderTabContent = () => {
-    if (activeTab === 0) { // Home tab
+    if (activeTab === 0) {
       return (
         <Grid container spacing={2}>
           {devices.map((device, index) => (
@@ -77,10 +72,15 @@ export default function Dashboard() {
         </Grid>
       );
     } else {
-      const device = devices[activeTab - 1]; // Find the corresponding device
+      const device = devices[activeTab - 1];
       if (!device) return null;
-  
-      switch (device.name) { // Match based on device name
+
+      // Check the device status and show an alert if offline
+      if (device.status === 'offline') {
+        return <Alert severity="error">Device {device.name} is offline</Alert>;
+      }
+
+      switch (device.name) {
         case 'Alarm Clock':
           return (
             <Suspense fallback={<div>Loading...</div>}>
@@ -94,25 +94,21 @@ export default function Dashboard() {
             </Suspense>
           );
         default:
-          return null; // Return null if no matching device is found
+          return null;
       }
     }
   };
 
-  // Render the dashboard component
   return (
     <>
-      {/* AppBar for the header */} 
       <AppBar position="static">
         <Toolbar>
           <IconButton color="inherit" aria-label="menu" edge="start" sx={{ mr: 2 }} onClick={goHome()}>
             <HomeIcon />
           </IconButton>
-          {/* Title of the dashboard */}
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             IoT Dashboard
           </Typography>
-          {/* Menu icon in the AppBar */}
           <IconButton color="inherit" aria-label="menu" edge="start" sx={{ mr: 2 }} onClick={toggleDrawer(true)}>
             <MenuIcon />
           </IconButton>
@@ -120,7 +116,6 @@ export default function Dashboard() {
               {DrawerList}
           </Drawer>
         </Toolbar>
-        {/* Tabs for navigating between devices */}
         <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)} aria-label="Device Tabs">
           <Tab label='Home' />
           {devices.map((device, index) => (
@@ -128,7 +123,6 @@ export default function Dashboard() {
           ))}
         </Tabs>
       </AppBar>
-      {/* Box containing the content rendered based on the active tab */}
       <Box sx={{ p: 3 }}>
         {renderTabContent()}
       </Box>

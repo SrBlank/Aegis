@@ -53,7 +53,7 @@ const deviceSchema = new mongoose.Schema({
 
 const Alarm = mongoose.model('Alarm', alarmSchema);
 const Device = mongoose.model('Device', deviceSchema)
-const HEARTBEAT_THRESHOLD = 5 * 60 * 1000; // 2 minutes in milliseconds
+const HEARTBEAT_THRESHOLD = config.heartbeatCheckSec * 1000; 
 
 setInterval(async () => {
   try {

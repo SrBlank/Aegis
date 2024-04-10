@@ -1,6 +1,5 @@
-// AlarmClock.js
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Alert } from '@mui/material';
 import axios from 'axios'; 
 import AlarmList from './AlarmList';
 import AddAlarmDialog from './AddAlarmDialog';
@@ -9,13 +8,16 @@ import EditAlarmDialog from './EditAlarmDialog';
 const AlarmClock = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [alarms, setAlarms] = useState([]);
+  const [deviceStatus, setDeviceStatus] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const url = "http://localhost:3001/api/alarmclock/alarms";
+  const deviceStatusUrl = "http://localhost:3001/api/devices/status/Alarm%20Clock";  // Assuming space is encoded as %20
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     fetchAlarms();
+    fetchDeviceStatus();
     return () => clearInterval(timer);
   }, []);
 
@@ -23,18 +25,25 @@ const AlarmClock = () => {
       try {
           const response = await axios.get(url);
           const fetchedAlarms = response.data;
-
           const sortedAlarms = fetchedAlarms.sort((a, b) => {
               const timeA = new Date('1970/01/01 ' + a.time);
               const timeB = new Date('1970/01/01 ' + b.time);
               return timeA - timeB;
           });
-
           setAlarms(sortedAlarms);
       } catch (error) {
           console.error('Error fetching alarms:', error);
       }
   };
+
+  const fetchDeviceStatus = async () => {
+    try {
+        const response = await axios.get(deviceStatusUrl);
+        setDeviceStatus(response.data.status);
+    } catch (error) {
+        console.error('Error fetching device status:', error);
+    }
+};
 
   const handleAddAlarm = async (newAlarm) => {
     try {
@@ -83,23 +92,26 @@ const handleToggleAlarm = async (id) => {
   }
 };
 
-  return (
-    <Box>
-      <Typography variant="h2" align="center" gutterBottom>
-        {currentTime.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
-        })}
-      </Typography>
-      <AlarmList alarms={alarms} onToggleAlarm={handleToggleAlarm} />
-      <Button onClick={() => setIsAddOpen(true)}>Add Alarm</Button>
-      <Button onClick={() => setIsEditOpen(true)}>Edit Alarms</Button>
-      <AddAlarmDialog isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} onAddAlarm={handleAddAlarm} />
-      <EditAlarmDialog isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} alarms={alarms} onDeleteAlarm={handleDeleteAlarm} />
-    </Box>
-  );
+return (
+  <Box>
+    {deviceStatus === 'offline' && (
+      <Alert severity="error">Alarm Clock is offline! Changes made may not be saved.</Alert>
+    )}
+    <Typography variant="h2" align="center" gutterBottom>
+      {currentTime.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      })}
+    </Typography>
+    <AlarmList alarms={alarms} onToggleAlarm={handleToggleAlarm} />
+    <Button onClick={() => setIsAddOpen(true)}>Add Alarm</Button>
+    <Button onClick={() => setIsEditOpen(true)}>Edit Alarms</Button>
+    <AddAlarmDialog isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} onAddAlarm={handleAddAlarm} />
+    <EditAlarmDialog isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} alarms={alarms} onDeleteAlarm={handleDeleteAlarm} />
+  </Box>
+);
 };
 
 export default AlarmClock;

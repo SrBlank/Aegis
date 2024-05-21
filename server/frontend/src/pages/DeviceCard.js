@@ -11,7 +11,7 @@ export default function DeviceCard({ device, onClick }) {
       <CardActionArea>
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            {device.name}
+            {device.dispName}
           </Typography>
           <Box display="flex" alignItems="center">
             <FiberManualRecordIcon

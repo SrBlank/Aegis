@@ -28,17 +28,3 @@ function App() {
 
 export default App;
 
-
-/* Things to Try
---data display
--divider
--table
---feedback
--alert
--dialog
--progress
--skeleton 
---navigation
--stepper --adding new devices
--tabs --navigating devices
-*/

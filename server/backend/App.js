@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const config = require('../../config.json');
+const { spawn } = require('child_process');
 
 // Connect to MongoDB
 mongoose.connect(config.mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -35,24 +36,39 @@ const alarmSchema = new mongoose.Schema({
 });
 
 // Define a schema for devices
-const deviceSchema = new mongoose.Schema({
+const availableDevicesSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Device name is required']
-  },
-  lastHeartbeat: {
-    type: Date,
-    default: Date.now
-  },
-  status: {
-    type: String,
-    enum: ['online', 'offline'],
-    default: 'offline'
   }
 });
 
+const deviceSchema = new mongoose.Schema({ 
+    name: {
+      type: String,
+    },
+    dispName:{
+      type: String,
+      default: ""
+    },
+    lastHeartbeat: {
+      type: Date,
+      default: Date.now
+    },
+    status: {
+      type: String,
+      enum: ['online', 'offline'],
+      default: 'offline'
+    },
+    connected: {
+      type: Boolean,
+      default: false
+    }
+});
+
 const Alarm = mongoose.model('Alarm', alarmSchema);
-const Device = mongoose.model('Device', deviceSchema)
+const Device = mongoose.model('Device', deviceSchema);
+const Available = mongoose.model('Available', availableDevicesSchema);
 const HEARTBEAT_THRESHOLD = 30 * 1000; //config.heartbeatCheckSec * 1000; 
 
 setInterval(async () => {
@@ -143,6 +159,59 @@ app.get('/api/devices/status/:name', async (req, res) => {
   }
 });
 
+app.get('/api/devices/available', async (req, res) => {
+  try {
+    const devices = await Available.find();
+    res.json(devices);
+  } catch (error) {
+    res.status(500).send({ message: 'Error fetching devices' });
+  }
+});
+
+app.get('/api/devices/connect/:name', async(req, res) => {
+  try {
+    /*
+    const runPythonScript = () => {
+      return new Promise((resolve, reject) => {
+        const pythonProcess = spawn('python3', ['connectToAP.py']);
+
+        pythonProcess.stdout.on('data', (data) => {
+          console.log(`Output: ${data}`);
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+          console.error(`Error: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error(`Python script finished with code ${code}`));
+          }
+        });
+      });
+    };
+
+    await runPythonScript();
+    */
+    return res.status(200).send({ message: 'Python script executed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Error executing Python script' });
+  }
+});
+
+app.post('/api/devices/available', async (req, res) => {
+  try {
+    const avail = new Available(req.body);
+    await avail.save();
+    res.status(201).send(avail);
+  } catch (error) {
+    res.status(500).send({ message: 'Error creating device' });
+  }
+});
+
 app.post('/api/devices', async (req, res) => {
   try {
     const device = new Device(req.body);
@@ -153,10 +222,10 @@ app.post('/api/devices', async (req, res) => {
   }
 });
 
-app.patch('/api/devices/heartbeat/:name', async (req, res) => {
+app.patch('/api/devices/heartbeat/:dispName', async (req, res) => {
   try {
     const device = await Device.findOneAndUpdate(
-      { name: req.params.name }, // Use name to find the device
+      { dispName: req.params.dispName }, // Use dispName to find the device
       {
         lastHeartbeat: Date.now(),
         status: 'online'  
@@ -173,6 +242,22 @@ app.patch('/api/devices/heartbeat/:name', async (req, res) => {
   }
 });
 
+app.patch('/api/devices/:id', async (req, res) => {
+  try {
+    const { dispName, connected } = req.body;
+    const device = await Device.findByIdAndUpdate(
+      req.params.id,
+      { dispName, connected },
+      { new: true }
+    );
+    if (!device) {
+      return res.status(404).send({ message: 'Device not found' });
+    }
+    res.json(device);
+  } catch (error) {
+    res.status(500).send({ message: 'Error updating device' });
+  }
+});
 
 app.delete('/api/devices/:id', async (req, res) => {
   try {

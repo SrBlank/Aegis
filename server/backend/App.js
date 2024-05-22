@@ -138,6 +138,10 @@ app.patch('/api/alarmclock/alarms/:id/toggle', async (req, res) => {
 /*            */
 /* Device API */
 /*            */
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 app.get('/api/devices', async (req, res) => {
   try {
     const devices = await Device.find();

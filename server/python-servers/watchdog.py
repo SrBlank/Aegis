@@ -1,7 +1,14 @@
 import subprocess
 import os
 import json
+import time
+import requests
 from datetime import datetime
+import digitalio
+import busio
+import board
+from adafruit_epd.ssd1680 import Adafruit_SSD1680
+from adafruit_epd.epd import Adafruit_EPD
 
 # Load configuration
 with open('config.json') as config_file:
@@ -56,7 +63,38 @@ def start_server(command, log_file):
                 
     return process
 
+def check_server_health(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200 and response.json().get('status') == 'ok':
+            return 'Running'
+        else:
+            return 'Error'
+    except requests.RequestException:
+        return 'Error'
+
+def update_display(statuses):
+    display.fill(Adafruit_EPD.WHITE)
+    display.set_cursor(0, 0)
+    display.set_text_color(Adafruit_EPD.BLACK)
+    display.set_text_wrap(True)
+    display.set_text_size(1)
+    for name, status in statuses.items():
+        display.print(f"{name}: {status}\n")
+    display.display()
+
 if __name__ == '__main__':
+    # EPD setup
+    spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+    ecs = digitalio.DigitalInOut(board.CE0)
+    dc = digitalio.DigitalInOut(board.D22)
+    rst = digitalio.DigitalInOut(board.D27)
+    busy = digitalio.DigitalInOut(board.D17)
+    srcs = None
+
+    display = Adafruit_SSD1680(122, 250, spi, cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
+                              rst_pin=rst, busy_pin=busy)
+
     # Commands to start each server
     frontend_command = f"npm start --prefix {RPI_SERVER_FRONTEND_PATH}"
     backend_command = f"nodemon {RPI_SERVER_BACKEND_PATH}"
@@ -72,9 +110,18 @@ if __name__ == '__main__':
     log_message(esp_handler_log, "Starting ESP32 handler server...")
     esp_handler_server = start_server(esp_handler_command, esp_handler_log)
 
+    # Server health check URLs
+    servers = {
+        'Frontend Server': f'http://localhost:{config["reactPort"]}/health',
+        'Backend Server': f'http://localhost:{config["expressPort"]}/health',
+        'ESP Handler Server': f'http://localhost:{config["handlerPort"]}/health'
+    }
+
     try:
         while True:
-            pass  # Keep the script running to monitor the servers
+            statuses = {name: check_server_health(url) for name, url in servers.items()}
+            update_display(statuses)
+            time.sleep(60)  # Check every 60 seconds
     except KeyboardInterrupt:
         log_message(frontend_log, "Stopping frontend server...")
         frontend_server.terminate()

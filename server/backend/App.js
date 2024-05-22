@@ -259,9 +259,9 @@ app.patch('/api/devices/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/devices/:id', async (req, res) => {
+app.delete('/api/devices/dispName/:dispName', async (req, res) => {
   try {
-    const result = await Device.findByIdAndDelete(req.params.id);
+    const result = await Device.findOneAndDelete({ dispName: req.params.dispName });
     if (!result) {
       return res.status(404).send({ message: 'Device not found' });
     }

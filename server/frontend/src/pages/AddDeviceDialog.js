@@ -174,7 +174,7 @@ const AddDeviceDialog = ({ open, onClose, onError }) => {
         )}
         {activeStep === 2 && (
           <Box sx={{ mt: 2 }}>
-            <Typography>Device setup complete. Click "Finish" to close.</Typography>
+            <Typography>Device setup complete. You may need to refresh the page to see changes. Click "Finish" to close.</Typography>
           </Box>
         )}
       </DialogContent>

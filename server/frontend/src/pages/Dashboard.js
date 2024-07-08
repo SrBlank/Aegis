@@ -8,6 +8,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import DeviceCard from './DeviceCard';
 import AddDeviceDialog from './AddDeviceDialog';
 import DeleteDeviceDialog from './DeleteDeviceDialog';
+import Settings from './Settings';
 
 const Alarm = lazy(() => import('./AlarmClock/AlarmClock'));
 const Weather = lazy(() => import('./WeatherStation'));
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [devices, setDevices] = useState([]);
   const [addDeviceOpen, setAddDeviceOpen] = useState(false);
   const [deleteDeviceOpen, setDeleteDeviceOpen] = useState(false);
+  const [settingsPageOpen, setSettingsOpen] = useState(false);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const connectedDevices = devices.filter(device => device.connected);
@@ -69,7 +71,9 @@ export default function Dashboard() {
       <List>
         {['Settings'].map((text, index) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              onClick={text == "Settings" ? () => setSettingsOpen(true) : null}
+            >
               <ListItemText primary={text} />
             </ListItemButton>
           </ListItem>
@@ -145,6 +149,7 @@ export default function Dashboard() {
       </Box>
       <AddDeviceDialog open={addDeviceOpen} onClose={() => setAddDeviceOpen(false)} onError={(errorMessage) => { setError(errorMessage); setSnackbarOpen(true); }} />
       <DeleteDeviceDialog open={deleteDeviceOpen} onClose={() => setDeleteDeviceOpen(false)} onError={(errorMessage) => { setError(errorMessage); setSnackbarOpen(true); }} />
+      <Settings open={settingsPageOpen} onClose={() => setSettingsOpen(false)} onError={(errorMessage) => { setError(errorMessage); setSnackbarOpen(true); }} />
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={5000}
